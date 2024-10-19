@@ -79,7 +79,7 @@ jobs:
           # Set RUNNER_CONFIG 
           echo "Setting repository variable RUNNER_CONFIG"
           # RUNNER_CONFIG='{\"group\": \"replacesvcs\", \"labels\": [\"self-hosted\", \"prod\", \"linuxdefender\"]}'
-          RUNNER_CONFIG='unraid'
+          RUNNER_CONFIG='ubuntu-latest'
           echo "RUNNER_CONFIG value:" $RUNNER_CONFIG 
           curl -s -X POST "$API_URL/actions/variables" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
