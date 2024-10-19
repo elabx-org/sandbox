@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: unraid
     env:
       GITHUB_TOKEN: ${{ secrets.GH_PAT_REPO_MANAGE }}
 
