@@ -31,13 +31,13 @@ jobs:
   #  MAKE TFSTATE STORAGE
   make-state-storage:
     name: "Make Tfstate Storage Account"
-    # runs-on: [self-hosted, linux, prod]
-    runs-on:
-      group: replacesvcs
-      labels:
-        - self-hosted
-        - prod
-        - linuxdefender
+    runs-on: ubuntu-latest
+    # runs-on:
+    #   group: replacesvcs
+    #   labels:
+    #     - self-hosted
+    #     - prod
+    #     - linuxdefender
     environment: 'uks plan' #GH ENV for OIDC
     steps:
     - name: Checkout
