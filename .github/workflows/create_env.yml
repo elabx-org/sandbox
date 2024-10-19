@@ -15,7 +15,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GH_PAT_REPO_MANAGE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Create environments and set variables
