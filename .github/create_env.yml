@@ -1,0 +1,87 @@
+name: Setup GH Env and Repo Vars
+
+on:
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - .github/workflows/create-env.yml
+
+permissions:
+  contents: read
+  actions: write
+  deployments: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_PAT_REPO_MANAGE }}
+
+    steps:
+      - name: Create environments and set variables
+        run: |
+          API_URL="https://api.github.com/repos/${{ github.repository }}"
+
+          # Function to create environment and set variables
+          create_environment() {
+            ENV_NAME=$1
+            ENCODED_ENV_NAME=$(echo $ENV_NAME | sed 's/ /%20/g')  # Encode spaces as %20 for the API request (handles both with and without spaces)
+            echo "Creating environment: $ENV_NAME"
+            curl -s -X PUT "$API_URL/environments/$ENCODED_ENV_NAME" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{}"
+
+            declare -A vars=(
+              ["APPLY_ENV"]="uks apply"
+              ["PLAN_ENV"]="uks plan"
+              ["TF_BACKEND_ENV"]="spoke"
+              ["TF_BACKEND_SA"]="eafsttfstatesbxuks001"
+              ["TF_BACKEND_SA_REGION"]="UKSouth"
+              ["TF_BACKEND_SA_REGION_SHORT"]="uks"
+              ["TF_BACKEND_SA_RG"]="rg-tfstate-sbx-storage-uks-001"
+              ["TF_BACKEND_SA_SKU"]="Standard_ZRS"
+            )
+
+            for key in "${!vars[@]}"; do
+              echo "Setting variable $key for environment $ENV_NAME"
+              curl -s -X POST "$API_URL/environments/$ENCODED_ENV_NAME/variables" \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                -d "{\"name\":\"$key\", \"value\":\"${vars[$key]}\"}"
+            done
+          }
+
+          # Create environments 'uks plan' and 'uks apply'
+          create_environment "uks plan"
+          create_environment "uks apply"
+
+      - name: Create repository variables
+        run: |
+          API_URL="https://api.github.com/repos/${{ github.repository }}"
+
+          declare -A repo_vars=(
+            ["ARM_CLIENT_ID"]="redacted_client_id"
+            ["ARM_SUBSCRIPTION_ID"]="redacted_sub_id"
+            ["ARM_TENANT_ID"]="redacted_arm_id"
+            ["TF_BACKEND_SA_CONTAINER"]="gold-template-az-{name-of-resource}"
+          )
+
+          # Create simple repository variables
+          for key in "${!repo_vars[@]}"; do
+            echo "Setting repository variable $key"
+            curl -s -X POST "$API_URL/actions/variables" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{\"name\":\"$key\", \"value\":\"${repo_vars[$key]}\"}"
+          done
+
+          # Set RUNNER_CONFIG 
+          echo "Setting repository variable RUNNER_CONFIG"
+          # RUNNER_CONFIG='{\"group\": \"replacesvcs\", \"labels\": [\"self-hosted\", \"prod\", \"linuxdefender\"]}'
+          RUNNER_CONFIG='unraid'
+          echo "RUNNER_CONFIG value:" $RUNNER_CONFIG 
+          curl -s -X POST "$API_URL/actions/variables" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"name\": \"RUNNER_CONFIG\", \"value\": \"$RUNNER_CONFIG\"}"
