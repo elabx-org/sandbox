@@ -53,4 +53,4 @@ jobs:
 
     - name: Create Tfstate Storage
       working-directory: ${{ github.workspace }}/scripts
-      run: bash ./create-tf-backend.sh
+      run: bash ./create-tf-backend.sh --checks-only
