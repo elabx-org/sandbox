@@ -5,9 +5,12 @@ on:
     inputs:
       checks_only:
         description: 'Run in checks-only mode'
-        required: false
-        type: boolean
-        default: false
+        required: true
+        type: choice
+        options:
+        - 'false'
+        - 'true'
+        default: 'false'
 
 permissions:
   id-token: write
@@ -20,7 +23,7 @@ jobs:
     uses: elabx-org/alz-reusable-workflows/.github/workflows/terraform-backend-create.yml@main
     with:
       environment: 'uks plan'  # Specify the GitHub environment name
-      checks_only: ${{ github.event.inputs.checks_only }}      
+      checks_only: ${{ inputs.checks_only == 'true' }}    
       subnet_ids: '/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet1,/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet2'
       run_resource_provider_check: true
       run_resource_group_check: true
