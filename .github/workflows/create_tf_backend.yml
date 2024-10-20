@@ -1,56 +1,34 @@
 name: 'uks - tfstate storage create'
-# This pipeline is to be run only once or 
-# If any changes need to be made to the resouces hosting the tfstate file for this repo
+
 on:
   workflow_dispatch:
-#   pull_request:
-#     branches:
-#     - main    
-    # - '**' #match any branch 
 
-# Permissions required for OIDC authentication
 permissions:
   id-token: write
   contents: read
   pull-requests: write
 
-env:
-  TERRAFORM_BACKEND_RESOURCE_GROUP: ${{ vars.TF_BACKEND_SA_RG }}
-  TERRAFORM_BACKEND_STORAGE_ACCOUNT: ${{ vars.TF_BACKEND_SA }}
-  TERRAFORM_BACKEND_LOCATION: ${{ vars.TF_BACKEND_SA_REGION }}
-  TERRAFORM_BACKEND_LOCATION_SHORT: ${{ vars.TF_BACKEND_SA_REGION_SHORT }}   
-  TERRAFORM_BACKEND_CONTAINER: ${{ vars.TF_BACKEND_SA_CONTAINER }}   
-  TERRAFORM_BACKEND_SKU: ${{ vars.TF_BACKEND_SA_SKU }}
-  TERRAFORM_BACKEND_ENV: ${{ vars.TF_BACKEND_ENV }}
-  ARM_TENANT_ID: ${{ vars.ARM_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.ARM_SUBSCRIPTION_ID }}      
-  ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }} 
-  ARM_USE_OIDC: true
-  
 jobs:
-  #  MAKE TFSTATE STORAGE
-  make-state-storage:
-    name: "Make Tfstate Storage Account"
-    runs-on: ubuntu-latest
-    # runs-on:
-    #   group: replacesvcs
-    #   labels:
-    #     - self-hosted
-    #     - prod
-    #     - linuxdefender
-    environment: 'uks plan' #GH ENV for OIDC
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
- 
-    # az login using oidc https://github.com/Azure/login#readme
-    - name: Azure Login  
-      uses: azure/login@v2
-      with:
-        client-id: ${{ vars.ARM_CLIENT_ID }}
-        tenant-id: ${{ vars.ARM_TENANT_ID }}
-        subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
-
-    - name: Create Tfstate Storage
-      working-directory: ${{ github.workspace }}/scripts
-      run: bash ./create-tf-backend.sh --checks-only
+  create-tfstate-storage:
+    uses: elabx-org/alz-reusable-workflows/.github/workflows/terraform-backend-create.yml@main
+    with:
+      environment: 'uks plan'  # Specify the GitHub environment name
+      subnet_ids: '/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet1,/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet2'
+      run_resource_provider_check: true
+      run_resource_group_check: true
+      run_storage_account_check: true
+      run_network_rules_check: false
+      run_blob_properties_check: true
+      run_container_properties_check: true
+      run_backup_checks: true
+      create_resource_group: true
+      create_storage_account: true
+      update_network_rules: false
+      create_container: true
+      update_blob_policies: true
+      update_container_policsies: true
+      setup_azure_backup: true
+    secrets:
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
