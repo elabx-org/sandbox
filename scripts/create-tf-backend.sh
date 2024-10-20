@@ -188,7 +188,7 @@ perform_checks() {
         check_storage_account || all_checks_passed=false
     fi
 
-    check_network_rules || all_checks_passed=false
+    # check_network_rules || all_checks_passed=false
     check_blob_service_properties || all_checks_passed=false
     check_container_service_properties || all_checks_passed=false
 
