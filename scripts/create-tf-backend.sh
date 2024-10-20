@@ -288,13 +288,15 @@ create_container() {
 
 # Function to update blob policies
 update_blob_policies() {
+    # Retrieve storage account key
+    STORAGE_KEY=$(az storage account keys list --resource-group $RESOURCE_GROUP --account-name $STORAGE_ACCOUNT --query '[0].value' --output tsv)
     if ! check_blob_service_properties; then
         log "INFO" "Updating blob policies..."
-        az storage blob service-properties update \
+        az storage blob service-properties delete-policy update \
             --account-name $STORAGE_ACCOUNT \
-            --enable-delete-retention true \
-            --delete-retention-days 90 \
-            --auth-mode login \
+            --account-key $STORAGE_KEY \
+            --enable true \
+            --days-retained 90 \
             --output none
     else
         log "INFO" "Blob policies are already configured correctly."
