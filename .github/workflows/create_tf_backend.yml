@@ -27,7 +27,7 @@ jobs:
       update_network_rules: false
       create_container: true
       update_blob_policies: true
-      update_container_policsies: true
+      update_container_policies: true
       setup_azure_backup: true
     secrets:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
