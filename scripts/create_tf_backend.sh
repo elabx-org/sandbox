@@ -343,7 +343,7 @@ main() {
         register_resource_provider "Microsoft.DataProtection"
         create_resource_group
         create_storage_account
-        update_storage_network_rules
+        # update_storage_network_rules
         create_container
         update_blob_policies
         update_container_policies
