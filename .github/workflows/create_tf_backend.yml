@@ -19,27 +19,30 @@ permissions:
   actions: read
 
 jobs:
-  create-tfstate-storage:
-    uses: elabx-org/alz-reusable-workflows/.github/workflows/terraform-backend-create.yml@main
-    with:
-      environment: 'uks plan'  # Specify the GitHub environment name
-      checks_only: ${{ inputs.checks_only == 'true' }}    
-      subnet_ids: '/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet1,/subscriptions/custom_sub_id/resourceGroups/custom_rg/providers/Microsoft.Network/virtualNetworks/custom_vnet/subnets/custom_subnet2'
-      run_resource_provider_check: true
-      run_resource_group_check: true
-      run_storage_account_check: true
-      run_network_rules_check: false
-      run_blob_properties_check: true
-      run_container_properties_check: true
-      run_backup_checks: true
-      create_resource_group: true
-      create_storage_account: true
-      update_network_rules: false
-      create_container: true
-      update_blob_policies: true
-      update_container_policies: true
-      setup_azure_backup: true
-    secrets:
-      ARM_TENANT_ID: ${{ vars.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ vars.ARM_SUBSCRIPTION_ID }}
-      ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }}
+  setup-backend:
+    runs-on: ubuntu-latest
+    environment: uks plan
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: elabx-org/alz-reusable-workflows
+          path: alz-reusable-workflows
+          fetch-depth: 0
+          ref: main
+
+      - name: Create TFState Storage
+        uses: ./alz-reusable-workflows/.github/actions/terraform-backend-create
+        with:
+          environment: uks plan
+          client_id: ${{ vars.ARM_CLIENT_ID }}
+          tenant_id: ${{ vars.ARM_TENANT_ID }}
+          subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+          # Backend config from environment variables
+          tf_backend_sa_rg: ${{ vars.TF_BACKEND_SA_RG }}
+          tf_backend_sa: ${{ vars.TF_BACKEND_SA }}
+          tf_backend_sa_container: ${{ vars.TF_BACKEND_SA_CONTAINER }}
+          tf_backend_sa_region: ${{ vars.TF_BACKEND_SA_REGION }}
+          tf_backend_sa_region_short: ${{ vars.TF_BACKEND_SA_REGION_SHORT }}
+          tf_backend_sa_sku: ${{ vars.TF_BACKEND_SA_SKU }}
+          tf_backend_env: ${{ vars.TF_BACKEND_ENV }}
