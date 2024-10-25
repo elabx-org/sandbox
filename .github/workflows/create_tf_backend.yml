@@ -10,7 +10,7 @@ on:
         options:
         - 'false'
         - 'true'
-        default: 'false'
+        default: 'true'
 
 permissions:
   id-token: write
