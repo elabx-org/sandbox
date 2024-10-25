@@ -40,6 +40,7 @@ jobs:
           subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
           # Use the workflow_dispatch input
           checks_only: ${{ github.event.inputs.checks_only }}
+          run_network_rules_check: false
           tf_backend_sa_rg: ${{ vars.TF_BACKEND_SA_RG }}
           tf_backend_sa: ${{ vars.TF_BACKEND_SA }}
           tf_backend_sa_container: ${{ vars.TF_BACKEND_SA_CONTAINER }}
