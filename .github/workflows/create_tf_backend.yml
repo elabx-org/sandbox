@@ -21,7 +21,7 @@ permissions:
 jobs:
   setup-backend:
     runs-on: ubuntu-latest
-    environment: uks apply
+    environment: uks plan
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
