@@ -35,11 +35,11 @@ jobs:
         uses: ./alz-reusable-workflows/.github/actions/terraform-backend-create
         with:
           environment: uks plan
-          client_id: ${{ vars.ARM_CLIENT_ID }}
-          tenant_id: ${{ vars.ARM_TENANT_ID }}
-          subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
-          # Backend config from environment variables
-          checks_only: true
+          client_id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant_id: ${{ secrets.ARM_TENANT_ID }}
+          subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          # Use the workflow_dispatch input
+          checks_only: ${{ github.event.inputs.checks_only }}
           tf_backend_sa_rg: ${{ vars.TF_BACKEND_SA_RG }}
           tf_backend_sa: ${{ vars.TF_BACKEND_SA }}
           tf_backend_sa_container: ${{ vars.TF_BACKEND_SA_CONTAINER }}
