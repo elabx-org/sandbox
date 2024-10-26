@@ -3,15 +3,15 @@ name: 'uks - tfstate storage create'
 on:
   workflow_dispatch:
     inputs:
-      checks_only:
-        description: 'Run in checks-only mode'
-        required: true
+      mode:
+        description: 'Which checks to run'
         type: choice
         options:
-        - 'false'
-        - 'true'
-        default: 'true'
-
+        - checks-only     # runs both checks
+        - backup-only     # runs only backup checks
+        - infra-only     # runs only infrastructure checks
+        - create         # runs in create/update mode
+        default: 'checks-only'
 permissions:
   id-token: write
   contents: write
