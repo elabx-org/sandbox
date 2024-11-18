@@ -17,22 +17,24 @@ jobs:
           repository: azure/ipam
           path: ipam
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Generate Version
         id: version
         run: |
           VERSION="v$(date +'%Y.%m.%d')-${{ github.run_number }}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: ipam
-          file: ipam/Dockerfile.deb
-          push: false
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/ipam:latest
-            ghcr.io/${{ github.repository_owner }}/ipam:${{ env.VERSION }}
-          outputs: type=docker,dest=/tmp/image.tar
+      - name: Build and save Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --file ipam/Dockerfile.deb \
+            --tag ghcr.io/${{ github.repository_owner }}/ipam:latest \
+            --tag ghcr.io/${{ github.repository_owner }}/ipam:${{ env.VERSION }} \
+            --output type=docker,dest=/tmp/image.tar \
+            ipam
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -42,7 +44,7 @@ jobs:
 
   push:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
