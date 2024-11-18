@@ -1,0 +1,33 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout IPAM repo
+        uses: actions/checkout@v3
+        with:
+          repository: azure/ipam
+          path: ipam
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: ipam
+          file: ipam/Dockerfile.deb
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ipam:latest
+            ghcr.io/${{ github.repository_owner }}/ipam:${{ github.sha }}
