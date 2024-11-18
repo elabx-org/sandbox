@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Additional tag for the image'
+        required: false
+        default: 'latest'
 
 jobs:
   build:
@@ -29,5 +34,5 @@ jobs:
           file: ipam/Dockerfile.deb
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/ipam:latest
             ghcr.io/${{ github.repository_owner }}/ipam:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/ipam:${{ inputs.image_tag }}
