@@ -12,7 +12,7 @@ jobs:
       version: ${{ env.VERSION }}
     steps:
       - name: Checkout IPAM repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: azure/ipam
           path: ipam
@@ -26,18 +26,20 @@ jobs:
           VERSION="v$(date +'%Y.%m.%d')-${{ github.run_number }}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Build and save Docker image
-        run: |
-          docker buildx build \
-            --platform linux/amd64 \
-            --file ipam/Dockerfile.deb \
-            --tag ghcr.io/${{ github.repository_owner }}/ipam:latest \
-            --tag ghcr.io/${{ github.repository_owner }}/ipam:${{ env.VERSION }} \
-            --output type=docker,dest=/tmp/image.tar \
-            ipam
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ipam
+          file: ipam/Dockerfile.deb
+          platforms: linux/amd64
+          push: false
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ipam:latest
+            ghcr.io/${{ github.repository_owner }}/ipam:${{ env.VERSION }}
+          outputs: type=docker,dest=/tmp/image.tar
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: /tmp/image.tar
@@ -47,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docker-image
           path: /tmp
