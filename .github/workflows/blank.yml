@@ -44,7 +44,7 @@ jobs:
 
   push:
     needs: build
-    runs-on: self-hosted
+    runs-on: ubuntu
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
